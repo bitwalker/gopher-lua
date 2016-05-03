@@ -6,7 +6,7 @@ package lua
 
 import (
 	"fmt"
-	"github.com/yuin/gopher-lua/parse"
+	"github.com/bitwalker/gopher-lua/parse"
 	"io"
 	"math"
 	"os"
