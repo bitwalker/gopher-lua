@@ -13,6 +13,7 @@ import (
 func mainLoop(L *LState, baseframe *callFrame) {
 	var inst uint32
 	var cf *callFrame
+	var newline int
 
 	if L.stack.IsEmpty() {
 		return
@@ -27,7 +28,18 @@ func mainLoop(L *LState, baseframe *callFrame) {
 	for {
 		cf = L.currentFrame
 		inst = cf.Fn.Proto.Code[cf.Pc]
+		L.InstCount++
 		cf.Pc++
+		if L.countHook != nil {
+			L.countHook(L)
+		}
+		newline = cf.Fn.Proto.DbgSourcePositions[cf.Pc-1]
+		if cf.Pc-1 == 0 || cf.Pc <= cf.Pc-1 || newline != cf.Fn.Proto.DbgSourcePositions[cf.Pc-2] {
+			L.LineCount++
+			if L.lineHook != nil {
+				L.lineHook(L)
+			}
+		}
 		if jumpTable[int(inst>>26)](L, inst, baseframe) == 1 {
 			return
 		}
@@ -543,6 +555,9 @@ func init() {
 			return 0
 		},
 		func(L *LState, inst uint32, baseframe *callFrame) int { //OP_CALL
+			if L.callHook != nil {
+				L.callHook(L)
+			}
 			reg := L.reg
 			cf := L.currentFrame
 			lbase := cf.LocalBase
@@ -842,6 +857,9 @@ func init() {
 			return 0
 		},
 		func(L *LState, inst uint32, baseframe *callFrame) int { //OP_RETURN
+			if L.returnHook != nil {
+				L.returnHook(L)
+			}
 			reg := L.reg
 			cf := L.currentFrame
 			lbase := cf.LocalBase

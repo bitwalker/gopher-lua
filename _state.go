@@ -331,6 +331,14 @@ func newLState(options Options) *LState {
 		wrapped:      false,
 		uvcache:      nil,
 		hasErrorFunc: false,
+
+		LineCount: 0,
+		InstCount: 0,
+
+		callHook:   nil,
+		returnHook: nil,
+		lineHook:   nil,
+		countHook:  nil,
 	}
 	ls.Env = ls.G.Global
 	return ls

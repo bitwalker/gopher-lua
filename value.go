@@ -215,6 +215,16 @@ type LState struct {
 	wrapped      bool
 	uvcache      *Upvalue
 	hasErrorFunc bool
+
+	// Debug hook functions
+	callHook   func(*LState)
+	returnHook func(*LState)
+	lineHook   func(*LState)
+	countHook  func(*LState)
+
+	// Debug counters
+	InstCount int32
+	LineCount int32
 }
 
 func (ls *LState) String() string                     { return fmt.Sprintf("thread: %p", ls) }
@@ -222,6 +232,19 @@ func (ls *LState) Type() LValueType                   { return LTThread }
 func (ls *LState) assertFloat64() (float64, bool)     { return 0, false }
 func (ls *LState) assertString() (string, bool)       { return "", false }
 func (ls *LState) assertFunction() (*LFunction, bool) { return nil, false }
+
+func (ls *LState) SetHookCalls(hook func(*LState)) {
+	ls.callHook = hook
+}
+func (ls *LState) SetHookReturns(hook func(*LState)) {
+	ls.returnHook = hook
+}
+func (ls *LState) SetHookLines(hook func(*LState)) {
+	ls.lineHook = hook
+}
+func (ls *LState) SetHookCount(hook func(*LState)) {
+	ls.countHook = hook
+}
 
 type LUserData struct {
 	Value     interface{}
